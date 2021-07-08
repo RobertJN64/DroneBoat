@@ -3,11 +3,10 @@ import RPi.GPIO as GPIO
 from time import sleep
 from datetime import datetime as dt
 import threading
-import os
 from time import time
+import math
 
 # for fish finder interaction
-import io
 import pynmea2
 import serial
 
@@ -57,19 +56,19 @@ def degrees(radians):
 
 
 # converts to negative angle format
-def angle(bigangle):
-    bigangle = bigangle % 360
-    if bigangle > 180:
-        bigangle -= 360
-    return bigangle
+def angle(Bigangle):
+    Bigangle = Bigangle % 360
+    if Bigangle > 180:
+        Bigangle -= 360
+    return Bigangle
 
 
 # converts to positive angle only format
-def bigangle(angle):
-    angle = angle % 360
-    angle += 360
-    angle = angle % 360
-    return angle
+def bigangle(Angle):
+    Angle = Angle % 360
+    Angle += 360
+    Angle = Angle % 360
+    return Angle
 
 
 # function that returns the angle off of north for the given points
@@ -135,7 +134,7 @@ def NavigateToPoint():
     global correctionforce
     targetx = targetPoints[0][0]
     targety = targetPoints[0][1]
-    error = 0
+    #error = 0
     while getDistance(targetx, targety, gpsPos[0], gpsPos[1]) > distance and isNavigating:
         coordlist = []
         fprint("pointing at angle")
@@ -206,8 +205,6 @@ GYRO_XOUT_H = 0x43
 GYRO_YOUT_H = 0x45
 GYRO_ZOUT_H = 0x47
 
-gyrototal = 0
-
 
 def MPU_Init():
     # write to sample rate register
@@ -235,7 +232,7 @@ def read_raw_data(addr):
     value = ((high << 8) | low)
 
     # to get signed value from mpu6050
-    if (value > 32768):
+    if value > 32768:
         value = value - 65536
     return value
 
@@ -268,7 +265,7 @@ def MonitorIMU():
 
         drift = drift / 100
 
-        starttime = time.time()
+        starttime = time()
 
         calib = True
 
@@ -283,7 +280,7 @@ def MonitorIMU():
 
                 imuAngle = bigangle(gyrototal)
 
-                sleep(0.05 - ((time.time() - starttime) % (0.05)))
+                sleep(0.05 - ((time() - starttime) % 0.05))
             except Exception as e:
                 fprint("Error in IUM monitor loop")
                 fprint(e)
@@ -293,8 +290,8 @@ def MonitorIMU():
 imuThread = threading.Thread(target=MonitorIMU, name='imuThread')
 imuThread.start()
 
-from gps import *
-
+#from gps import *
+from gps import gps, WATCH_ENABLE, WATCH_NEWSTYLE
 
 def MonitorGPS():
     global gpsPos
@@ -343,7 +340,7 @@ def MonitorFishFinder():
     global depth
     fprint("Connecting to fish finder...")
     ser = serial.Serial('/dev/ttyUSB0', 4800, timeout=1.0)
-    sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
+    #sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
     fprint("Connection established!")
     while True:
         try:
@@ -542,7 +539,7 @@ def right():
 @app.route("/ltforward")
 def ltforward():
     global lasttime
-    lastime = dt.now().minute
+    lasttime = dt.now().minute
     print("Website has requested Left Forward")
     print("Motors off")
     GPIO.output(waterjet, GPIO.HIGH)
@@ -562,7 +559,7 @@ def ltforward():
 @app.route("/ltmini")
 def ltmini():
     global lasttime
-    lastime = dt.now().minute
+    lasttime = dt.now().minute
     print("Website has requested Left Mini")
     print("Motors off")
     GPIO.output(waterjet, GPIO.HIGH)
@@ -660,13 +657,8 @@ def loc():
     global distance
     global depth
     print("Website has requested location + rotation")
-    data = {}
-    data["Rotation"] = imuAngle
-    data["GPSX"] = gpsPos[1]
-    data["GPSY"] = gpsPos[0]
-    data["Dist"] = cdist
-    data["TDist"] = distance
-    data["Depth"] = depth
+    data = {"Rotation": imuAngle, "GPSX": gpsPos[1], "GPSY": gpsPos[0], "Dist": cdist, "TDist": distance,
+            "Depth": depth}
     return jsonify(data)
 
 
@@ -694,7 +686,7 @@ def overide():
 
 
 @app.route("/calib")
-def calib():
+def Calib():
     global calib
     fprint("CALIBRATE IMU")
     calib = False
@@ -726,7 +718,7 @@ def viewVars():
     global correctionforce
     global distance
 
-    return "<html><body><p>cforce: " + correctionforce + "<br>Distance : " + dist + "</p></body></html>"
+    return "<html><body><p>cforce: " + str(correctionforce) + "<br>Distance : " + str(distance) + "</p></body></html>"
 
 
 @app.route("/setvar")
@@ -738,10 +730,10 @@ def setvar():
 
     if var == "cforce":
         correctionforce = value
-        return "Succesfully updated correction force to " + value
+        return "Succesfully updated correction force to " + str(value)
     elif var == "dist":
         distance = value
-        return "Succesfully updated distance to " + value
+        return "Succesfully updated distance to " + str(value)
     else:
         return "OOPS! We couldn't find that variable! Try cforce or dist!"
 
