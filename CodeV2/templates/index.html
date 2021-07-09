@@ -115,21 +115,18 @@
          <td align="center">
             Left-Forward
             <br>
-            <input type="hidden" name="ltforward" value="0" id="ltforward" />
             <input type="image" src="arrow_up_left.png"
             id="imgLtforward" onclick="sendMotion ('ltforward');"/>
          </td>
          <td align="center">
             Forward
             <br>
-            <input type="hidden" name="forward" value="0" id="forward" />
             <input type="image" src="forward.png" id="imgforward"
             onclick="sendMotion ('forward');"/>
          </td>
          <td align="center">
             Right-Forward
             <br>
-            <input type="hidden" name="rtforward" value="0" id="rtforward" />
             <input type="image" src="arrow_up_right.png"
             id="imgRtforward" onclick="sendMotion ('rtforward');"/>
          </td>
@@ -138,21 +135,20 @@
          <td align="center">
             Left
             <br>
-            <input type="hidden" name="left" value="0" id="left" />
             <input type="image" src="left.png" id="imgleft"
             onclick="sendMotion ('left');"/>
          </td>
          <td align="center">
             Stop
             <br>
-            <input type="hidden" name="stop" value="0" id="stop" />
+
             <input type="image" src="stop.png" width="50" id="imgstop"
             onclick="sendMotion ('stop');"/>
          </td>
          <td align="center">
             Right
             <br>
-            <input type="hidden" name="right" value="0" id="right" />
+
             <input type="image" src="right.png" id="imgright"
             onclick="sendMotion ('right');"/>
          </td>
@@ -161,21 +157,21 @@
          <td align="center">
             Left-Small
             <br>
-            <input type="hidden" name="ltmini" value="0" id="ltforward" />
+
             <input type="image" src="arrow_down_left.png"
             id="imgltback" onclick="sendMotion ('ltmini');"/>
          </td>
          <td align="center">
             Backward
             <br>
-            <input type="hidden" name="backward" value="0" id="backward" />
+
             <input type="image" src="backward.png" id="imgbackward"
             onclick="sendMotion ('backward');"/>
          </td>
          <td align="center">
             Right-Small
             <br>
-            <input type="hidden" name="rtmini" value="0" id="rtforward" />
+
             <input type="image" src="arrow_down_right.png"
             id="imgrtback" onclick="sendMotion ('rtmini');"/>
          </td>
@@ -187,7 +183,7 @@
          <td align="center">
             Activate Waterjet!
             <br>
-            <input type="hidden" name="jet" value="0" id="jet" />
+
             <input type="image" src="forward.png"
             id="jetpng" onclick="sendMotion ('jet');"/>
          </td>
@@ -210,22 +206,21 @@
          <td align="center">
             Calibrate IMU
             <br>
-            <input type="hidden" name="stop" value="0" id="stop" />
-            <input type="image" src="gohome.png" width="50" id="imgstop"
+
+            <input type="image" src="gohome.png" width="50" id="imgcalib"
             onclick="sendMotion ('calib');"/>
          </td>
          <td align="center">
             Overide GPS
             <br>
-            <input type="hidden" name="stop" value="0" id="stop" />
-            <input type="image" src="stop.png" width="50" id="imgstop"
-            onclick="sendMotion ('overide');"/>
+            <input type="image" src="stop.png" width="50" id="imgoverride"
+            onclick="sendMotion ('override');"/>
          </td>
          <td align="center">
             Reset IMU
             <br>
-            <input type="hidden" name="stop" value="0" id="stop" />
-            <input type="image" src="gohome.png" width="50" id="imgstop"
+
+            <input type="image" src="gohome.png" width="50" id="imggohome"
             onclick="sendMotion ('reset');"/>
          </td>
       </tr>

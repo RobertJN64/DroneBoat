@@ -126,9 +126,9 @@ def loc():
     return jsonify(data)
 
 
-@app.route("/overide")
-def overide():
-    droneBoatGPS.fprint("OVERIDE")
+@app.route("/override")
+def override():
+    droneBoatGPS.fprint("OVERRIDE")
     droneBoatGPS.isNavigating = False
     droneBoatGPS.targetPoints = []
     droneBoat.stop()
