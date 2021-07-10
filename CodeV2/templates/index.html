@@ -13,11 +13,16 @@
        height: 20px;
        posistion: absolute;
    }
+   #endMark {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+   }
+
    </style>
    <title>Wifi Controlled Rover</title>
    <script src="jquerylocal.js"></script>
    <script type="text/javascript">
-      document.onkeypress = keypressed;
       var last_action = "";
       var start_dt = new Date ( );
       var last_mills = start_dt.getTime ( );
@@ -46,6 +51,15 @@
          request.send ( );
       }
 
+
+      function SendScan (tx,ty,bx,by)
+      {
+          action = ("scanarea?tx=" + tx + "&ty=" + ty + "&bx=" + bx + "&by=" + by + "&lines=10");
+          request = new XMLHttpRequest ();
+          request.open ("GET",action,true);
+          request.send();
+      }
+
       function retriveLocation(){
          fetch("loc")
          .then(function (response) {
@@ -57,54 +71,21 @@
       document.querySelector("#IMU").innerHTML = myJSON.Rotation;
       document.querySelector("#Dist").innerHTML = myJSON.Dist.toFixed(6) + "/" + myJSON.TDist.toFixed(6);
       document.querySelector("#Depth").innerHTML = myJson.Depth.toFixed(6) + " meters";
-      moveMark(myJSON.GPSX,myJSON.GPSY)
+      document.querySelector("#Print").innerHTML = myJSON.Print;
+      moveMark(myJSON.GPSX,myJSON.GPSY,"locMark");
+      moveMark(myJSON.OLDX,myJSON.OLDY,"endMark");
+
+      deleteMarks()
+      for (var i = 0; i < myJSON.TargetPoints.length; i++){
+          placeMark(myJSON.TargetPoints[i].GPSX, myJSON.TargetPoints[i].GPSY)
+
+      }
       })
       }
 
 
 
-      setInterval( retriveLocation, 5*1000);
-
-      function keypressed (event) {
-         var keyCd = ('charCode' in event) ? event.charCode : event.keyCode;
-
-         if (keyCd == 49)            // 1
-            sendMotion ('panlt')
-
-         if (keyCd == 50)            // 2
-            sendMotion ('panrt')
-
-         if (keyCd == 51)            // 3
-            sendMotion ('panfull_lt')
-
-         if (keyCd == 52)
-            sendMotion ('panfull_rt') // 4
-
-         if (keyCd == 47)            // /
-            sendMotion ('home')
-
-         if (keyCd == 113 || keyCd == 81)  // q
-            sendMotion ('ltforward')
-
-         if (keyCd == 119 || keyCd == 87)  // w
-            sendMotion ('forward')
-
-         if (keyCd == 122 || keyCd == 90)  // z
-            sendMotion ('backward')
-
-         if (keyCd == 101 || keyCd == 69)  // e
-            sendMotion ('rtforward')
-
-         if (keyCd == 97 || keyCd == 65)   // a
-            sendMotion ('left')
-
-         if (keyCd == 104 || keyCd == 72)  // h
-            sendMotion ('stop')
-
-         if (keyCd == 115 || keyCd == 83)  // s
-            sendMotion ('right')
-      }
-
+      setInterval( retriveLocation, 2.5*1000);
    </script>
 </head>
 <body>
@@ -200,7 +181,8 @@
          </td>
       </tr>
       </table>
-      <img id="locMark" src="marker.png" width="20" height="20">
+      <img id="locMark" src="markerW.png" width="20" height="20">
+      <img id="endMark" src="markerEnd.png" width="20" height="20">
       <table border="0" cellpadding="6">
       <tr>
          <td align="center">
@@ -225,6 +207,15 @@
          </td>
       </tr>
    </table>
+   <table border="0" cellpadding="6">
+      <tr>
+          <td align="center">
+              ScanMap
+              <br>
+              <img id="scanmap" src="pond.png" height="500" width="500">
+          </td>
+       </tr>
+   </table>
    <br>
 
    <p>Current Depth</p>
@@ -237,6 +228,8 @@
    <p id=IMU></p>
    <p>Current distance from target point</p>
    <p id=Dist></p>
+   <p>Last Print</p>
+   <p id=Print></p>
 
    <br><br>
 </center>
@@ -253,7 +246,38 @@ var gpsBY = -86.151867;
 var gpsTX = 39.998573;
 var gpsTY = -86.151004;
 
+function getMap(){
+   fetch("map")
+   .then(function (response) {
+    return response.json();
+})
+.then(function(myJSON){
+mapW = myJSON.MapW;
+mapH = myJSON.MapH;
+//really the top
+gpsBX = myJSON.TopN;
+gpsBY = myJSON.TopW;
+
+//really the bottom
+gpsTX = myJSON.BottomN;
+gpsTY = myJSON.BottomW;
+var elem = document.getElementById("map");
+elem.src = myJSON.Source;
+elem.height = myJSON.MapH;
+elem.width = myJSON.MapW;
+elem = document.getElementById("scanmap");
+elem.src = myJSON.Source;
+elem.height = myJSON.MapH;
+elem.width = myJSON.MapW;
+})
+}
+
+getMap();
+
 retriveLocation()
+var FlipBitty = 0;
+var gpsx = 0;
+var gpsy = 0;
 
 $(document).ready(function() {
 $("#map").on("click", function(event) {
@@ -269,17 +293,49 @@ var gpsy = (((clickx/mapW) * (gpsTY - gpsBY)) + gpsBY).toFixed(6);
 sendLocation(gpsx, gpsy);
 
 var marker = document.createElement("img");
-marker.src = "marker.png"
+marker.src = "marker.png";
 marker.height = 20;
 marker.width = 20;
+marker.className = "TargetLocs";
 
 var style = "position: absolute; top: " + (event.pageY-20) + "px; left: " + (event.pageX-10) + "px;";
 marker.style = style;
 document.body.appendChild(marker);
 
-}); });
+});
+$("#scanmap").on("click", function(event) {
 
-function moveMark(gpsN, gpsW)
+var clickx = event.pageX - $("#scanmap").position().left;
+var clicky = event.pageY - $("#scanmap").position().top;
+
+var gpsx = (((clicky/mapH) * (gpsTX - gpsBX)) + gpsBX).toFixed(6);
+var gpsy = (((clickx/mapW) * (gpsTY - gpsBY)) + gpsBY).toFixed(6);
+
+var marker = document.createElement("img");
+marker.src = "markerPhone.png";
+marker.height = 20;
+marker.width = 20;
+marker.className = "TargetLocs"; //this makes it auto-delete
+var style = "position: absolute; top: " + (event.pageY-20) + "px; left: " + (event.pageX-10) + "px;";
+marker.style = style;
+document.body.appendChild(marker);
+
+if(FlipBitty == 1)
+{
+    FlipBitty = 0;
+    SendScan(lastx,lasty,gpsx,gpsy);
+}
+else
+{
+    FlipBitty = 1;
+    lastx = gpsx;
+    lasty = gpsy;
+
+}
+});
+});
+
+function moveMark(gpsN, gpsW, id)
 {
     //alert("moving")
     var N = (((gpsN-gpsBX)/(gpsTX-gpsBX))*mapH) + $("#map").position().top - 20;
@@ -288,13 +344,40 @@ function moveMark(gpsN, gpsW)
     //alert("N: " + N + " W: " + W);
     N = N.toFixed(0);
     W = W.toFixed(0);
-    var elem = document.getElementById("locMark")
+    var elem = document.getElementById(id);
     elem.style.top = N + 'px';
     elem.style.left = W + 'px';
     elem.style.position = "absolute";
 }
-//alert("move")
-//moveMark(40,-86)
+
+function placeMark(gpsW, gpsN)
+{
+    //alert(gpsN);
+    //alert(gpsW);
+    var N = (((gpsN-gpsBX)/(gpsTX-gpsBX))*mapH) + $("#map").position().top - 20;
+    var W = (((gpsW-gpsBY)/(gpsTY-gpsBY))*mapW) + $("#map").position().left - 10;
+    N = N.toFixed(0);
+    W = W.toFixed(0);
+    var elem = document.createElement("img");
+    elem.style.top = N + 'px';
+    elem.style.left = W + 'px';
+    //alert("N:" + N + " W: " + W);
+    elem.style.position = "absolute";
+    elem.src = "marker.png";
+    elem.height = 20;
+    elem.width = 20;
+    elem.className = "TargetLocs";
+    document.body.appendChild(elem);
+}
+
+function deleteMarks()
+{
+    var elements = document.getElementsByClassName("TargetLocs")
+    while (elements[0]) //strange loop because we modify while it runs
+    {
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
 
 
 </script>
