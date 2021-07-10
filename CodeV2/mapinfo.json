@@ -1,0 +1,46 @@
+{
+    "Pond": {
+        "TopN": 39.998929,
+        "TopW": -86.151867,
+        "BottomN": 39.998573,
+        "BottomW": -86.151004,
+        "MapW": 500,
+        "MapH": 250,
+        "Source": "pond.png",
+        "Res": 0.2,
+        "MaxDepth": 5
+    },
+    "Meadowlark": {
+        "TopN": 39.983208,
+        "TopW": -86.136908,
+        "BottomN": 39.982026,
+        "BottomW": -86.135181,
+        "MapW": 500,
+        "MapH": 500,
+        "Source": "meadowlark.png",
+        "Res": 0.2,
+        "MaxDepth": 5
+    },
+    "LimeLakeSmall": {
+        "TopN": 44.886608,
+        "TopW": -85.845936,
+        "BottomN": 44.884576,
+        "BottomW": -85.841345,
+        "MapW": 500,
+        "MapH": 500,
+        "Source": "LimeLakeSmall.png",
+        "Res": 0.2,
+        "MaxDepth": 3
+    },
+    "LimeLakeFishing": {
+        "TopN": 44.894234,
+        "TopW": -85.852445,
+        "BottomN": 44.883510,
+        "BottomW": -85.830756,
+        "MapW": 500,
+        "MapH": 500,
+        "Source": "LimeLakeFishing.png",
+        "Res": 0.2,
+        "MaxDepth": 10
+    }
+}

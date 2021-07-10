@@ -105,7 +105,7 @@ def MonitorGPS(droneBoatGPS):
             print(e)
 
 
-def MonitorFishFinder(droneBoatGPS):
+def MonitorFishFinder(droneBoatGPS, depthMap):
     droneBoatGPS.fprint("Connecting to fish finder...")
     ser = serial.Serial('/dev/ttyUSB0', 4800, timeout=1.0)
     droneBoatGPS.fprint("Connection established!")
@@ -119,6 +119,17 @@ def MonitorFishFinder(droneBoatGPS):
                 print(("Lon: " + str(msg.longitude)))
 
                 droneBoatGPS.gpsPos = (round(msg.longitude), round(msg.latitude))
+
+                line = "GPSN: " + str(droneBoatGPS.gpsPos[1]) + " GPSW: " + str(
+                    droneBoatGPS.gpsPos[0]) + " DPT: " + str(droneBoatGPS.depth) + ",\n"
+                jsonLine = {
+                    "GPSN": str(droneBoatGPS.gpsPos[1]),
+                    "GPSW": str(droneBoatGPS.gpsPos[0]),
+                    "DPT": str(droneBoatGPS.depth)
+                }
+
+                depthMap.depthdata.append(line)
+                depthMap.depthjson.append(jsonLine)
 
             if msg.sentence_type == "DPT":
                 print("We have a depth sentence!")

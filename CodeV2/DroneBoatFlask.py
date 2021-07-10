@@ -2,16 +2,26 @@ from flask import Flask, render_template, request, jsonify
 from DroneBoat import DroneBoat
 from DroneBoatGPS import DroneBoatGPS
 import DroneBoatIO
+from DroneBoatDepthMapTools import DepthMap
 from time import sleep
 import threading
+import json
+
+#THIS IS THE MAIN CODE FILE! IT WILL LAUNCH ALL OTHER THREADS
 
 #CONFIG
 ExternalGPS = False
 FishFinder = True
+CurrentMap = "LimeLakeSmall"
+
+with open("mapinfo.json") as file:
+    allmaps = json.load(file)
+mapinfo = allmaps[CurrentMap]
 
 sleep(10)
 droneBoat = DroneBoat()
 droneBoatGPS = DroneBoatGPS(droneBoat)
+depthMap = DepthMap(mapinfo, droneBoatGPS)
 
 
 droneBoatGPS.fprint("DroneBoatMain python script started!")
@@ -121,10 +131,21 @@ def setvar():
 @app.route("/loc")
 def loc():
     print("Website has requested location + rotation")
+    truedepth = (droneBoatGPS.depth * 3) + 1  # convert to feet, add 1 to compensate for sensor loc
     data = {"Rotation": droneBoatGPS.imuAngle, "GPSX": droneBoatGPS.gpsPos[1], "GPSY": droneBoatGPS.gpsPos[0],
-            "Dist": droneBoatGPS.cdist, "TDist": droneBoatGPS.distance, "Depth": droneBoatGPS.depth}
-    return jsonify(data)
+            "Dist": droneBoatGPS.cdist, "TDist": droneBoatGPS.distance, "Depth": truedepth,
+            "Print": droneBoatGPS.printList[len(droneBoatGPS.printList)-1]}
 
+    if depthMap.lastPoint is not None:
+        data["OLDX"] = depthMap.lastPoint[1]
+        data["OLDY"] = depthMap.lastPoint[0]
+
+    points = []
+    for point in droneBoatGPS.targetPoints:
+        points.append({"GPSX": point[0], "GPSY": point[1]})
+
+    data["TargetPoints"] = points
+    return jsonify(data)
 
 @app.route("/override")
 def override():
@@ -157,6 +178,50 @@ def resetIMU():
     droneBoatGPS.gyrototal = 0
     return "ok"
 
+@app.route ("/depthmap")
+def depthMap():
+    return depthMap.MakeDepthMap()
+
+
+@app.route("/scanarea")
+def scanArea():
+    print("AREA SCAN REQUESTED")
+    tx = float(request.args['tx'])
+    ty = float(request.args['ty'])
+    bx = float(request.args['bx'])
+    by = float(request.args['by'])
+    LineCount = int(request.args['lines'])
+
+    XList = [tx, bx]
+    frac = (float(1) / LineCount)
+    YList = []
+    for i in range(0, (LineCount + 1)):
+        YList.append(frac * i * (by - ty) + ty)
+
+    side = 0
+    for y in YList:
+        x = XList[(side % 2)]
+        droneBoatGPS.isNavigating = True
+        droneBoatGPS.addPoint(y, x)
+        side += 1
+
+    droneBoatGPS.isNavigating = True
+    return "ok"
+
+@app.route("/map")
+def mapinfo():
+    return jsonify(mapinfo)
+
+
+@app.route("/dumpdata")
+def writeToFile():
+    fname = str(request.args["name"]) + ".txt"
+    f = open(fname, "w+")
+    for line in depthMap.depthdata:
+        f.write(line)
+    f.close()
+    return "File written."
+
 def timeoutThread():
     print("Timeout thread starting")
     while True:
@@ -169,7 +234,7 @@ def Navigate():
         if droneBoatGPS.isNavigating and len(droneBoatGPS.targetPoints) != 0:
             droneBoatGPS.fprint("Engaging Nav")
             droneBoatGPS.navigateToPoint()
-            droneBoatGPS.deletePoint()
+            depthMap.lastPoint = droneBoatGPS.deletePoint()
         sleep(0.1)
 
 
@@ -188,7 +253,7 @@ if ExternalGPS:
     gpsThread.start()
 
 if FishFinder:
-    FishFinderThread = threading.Thread(target=DroneBoatIO.MonitorFishFinder, args=(droneBoatGPS,), name='FishFinderThread')
+    FishFinderThread = threading.Thread(target=DroneBoatIO.MonitorFishFinder, args=(droneBoatGPS,depthMap,), name='FishFinderThread')
     FishFinderThread.start()
 
 print("Flask is running!")

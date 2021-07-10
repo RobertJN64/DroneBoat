@@ -61,9 +61,10 @@ class DroneBoatGPS:
 
     def deletePoint(self):
         if len(self.targetPoints) > 0:
-            self.targetPoints.pop(0)
+            return self.targetPoints.pop(0)
         else:
             self.fprint("EMPTY LIST, you probably did an overide?")
+            return None
 
     def pointAtAngle(self, target, accuracy):
         print(("Target " + str(target)))
