@@ -36,8 +36,6 @@ class DroneBoat:
 
         print("relays set to forward")
 
-        print("Setting up Flask")
-
         self.lasttime = time.time()
 
     def timeout(self):
