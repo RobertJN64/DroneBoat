@@ -127,7 +127,8 @@ class DepthMap:
             self.PopulatedMap.append(tempmap)
 
         for line in self.depthjson:
-            self.PlaceOnMap(float(line["GPSW"]), float(line["GPSN"]), float(line["DPT"]))
+            if line["DPT"] is not None:
+                self.PlaceOnMap(float(line["GPSW"]), float(line["GPSN"]), float(line["DPT"]))
 
         for y in range(0, len(self.MapArray)):
             for x in range(0, len(self.MapArray[y])):

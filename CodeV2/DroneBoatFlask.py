@@ -131,7 +131,10 @@ def setvar():
 @app.route("/loc")
 def loc():
     print("Website has requested location + rotation")
-    truedepth = (droneBoatGPS.depth * 3) + 1  # convert to feet, add 1 to compensate for sensor loc
+    if droneBoatGPS.depth is not None:
+        truedepth = (droneBoatGPS.depth * 3) + 1  # convert to feet, add 1 to compensate for sensor loc
+    else:
+        truedepth = "None"
     data = {"Rotation": droneBoatGPS.imuAngle, "GPSX": droneBoatGPS.gpsPos[1], "GPSY": droneBoatGPS.gpsPos[0],
             "Dist": droneBoatGPS.cdist, "TDist": droneBoatGPS.distance, "Depth": truedepth,
             "Print": droneBoatGPS.printList[len(droneBoatGPS.printList)-1]}
@@ -179,7 +182,7 @@ def resetIMU():
     return "ok"
 
 @app.route ("/depthmap")
-def depthMap():
+def getDepthMap():
     return depthMap.MakeDepthMap()
 
 
@@ -209,7 +212,7 @@ def scanArea():
     return "ok"
 
 @app.route("/map")
-def mapinfo():
+def getmap():
     return jsonify(mapinfo)
 
 
@@ -257,4 +260,4 @@ if FishFinder:
     FishFinderThread.start()
 
 print("Flask is running!")
-app.run(host='0.0.0.0', port=80, debug=True)
+app.run(host='0.0.0.0', port=80, debug=False)
