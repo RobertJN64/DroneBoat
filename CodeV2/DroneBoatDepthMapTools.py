@@ -96,8 +96,8 @@ class DepthMap:
         return html + start + vardef + func + func2 + end
 
     def PlaceOnMap(self, X, Y, Depth):
-        truex = int(round(((X - self.mapinfo["TopW"]) / (self.mapinfo["BottomW"] - self.mapinfo["TopW"])) * self.mapinfo["MapW"]))
-        truey = int(round(((Y - self.mapinfo["TopN"]) / (self.mapinfo["BottomN"] - self.mapinfo["TopN"])) * self.mapinfo["MapH"]))
+        truex = int(round(((X - self.mapinfo["TopW"]) / (self.mapinfo["BottomW"] - self.mapinfo["TopW"])) * self.mapinfo["MapW"] * self.mapinfo["Res"]))
+        truey = int(round(((Y - self.mapinfo["TopN"]) / (self.mapinfo["BottomN"] - self.mapinfo["TopN"])) * self.mapinfo["MapH"] * self.mapinfo["Res"]))
 
         try:
             self.MapArray[truey][truex] = Depth
@@ -128,7 +128,7 @@ class DepthMap:
 
         for line in self.depthjson:
             if line["DPT"] is not None:
-                self.PlaceOnMap(float(line["GPSW"]), float(line["GPSN"]), float(line["DPT"]))
+                self.PlaceOnMap(float(line["GPSW"]) * scale, float(line["GPSN"]) * scale, float(line["DPT"]))
 
         for y in range(0, len(self.MapArray)):
             for x in range(0, len(self.MapArray[y])):

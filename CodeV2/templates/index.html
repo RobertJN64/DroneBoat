@@ -70,7 +70,7 @@
       document.querySelector("#GY").innerHTML = myJSON.GPSY;
       document.querySelector("#IMU").innerHTML = myJSON.Rotation;
       document.querySelector("#Dist").innerHTML = myJSON.Dist.toFixed(6) + "/" + myJSON.TDist.toFixed(6);
-      document.querySelector("#Depth").innerHTML = myJson.Depth.toFixed(6) + " meters";
+      document.querySelector("#Depth").innerHTML = myJson.Depth.toFixed(6) + " feet";
       document.querySelector("#Print").innerHTML = myJSON.Print;
       moveMark(myJSON.GPSX,myJSON.GPSY,"locMark");
       moveMark(myJSON.OLDX,myJSON.OLDY,"endMark");

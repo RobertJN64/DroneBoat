@@ -48,7 +48,7 @@ def read_raw_data(addr):
 
     # to get signed value from mpu6050
     if value > 32768:
-        value = value - 65536
+        value -= 65536
     return value
 
 
@@ -66,7 +66,7 @@ def MonitorIMU(droneBoatGPS):
             Gz = gyro_z / 131.0
             drift += Gz
 
-        drift = drift / 100
+        drift /= 100
 
         starttime = time()
 

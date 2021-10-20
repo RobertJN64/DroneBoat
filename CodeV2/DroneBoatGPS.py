@@ -44,6 +44,7 @@ class DroneBoatGPS:
         self.cdist = 0
         self.depth = 0
         self.gyrototal = 0
+        self.IMURecalib = 1
 
         # nav config
         self.correctionforce = 0.01
@@ -110,6 +111,11 @@ class DroneBoatGPS:
                     a = getAngle(self.coordList[0][0], self.coordList[0][1], currentx, currenty)
                     b = getAngle(currentx, currenty, targetx, targety)
                     error = angle(a - b)
+
+                    if self.IMURecalib == 1:
+                        x = bigangle(getAngle(self.coordList[0][0], self.coordList[0][1], currentx, currenty))
+                        self.imuAngle = x
+                        self.gyrototal = x
 
                     self.fprint(str("Error: " + str(error)))
                     if abs(error) > 10:

@@ -132,7 +132,7 @@ def setvar():
 def loc():
     print("Website has requested location + rotation")
     if droneBoatGPS.depth is not None:
-        truedepth = (droneBoatGPS.depth * 3) + 1  # convert to feet, add 1 to compensate for sensor loc
+        truedepth = (droneBoatGPS.depth * 3) + float(1)/3  # convert to feet, add 1 to compensate for sensor loc
     else:
         truedepth = "None"
     data = {"Rotation": droneBoatGPS.imuAngle, "GPSX": droneBoatGPS.gpsPos[1], "GPSY": droneBoatGPS.gpsPos[0],
@@ -219,7 +219,7 @@ def getmap():
 @app.route("/dumpdata")
 def writeToFile():
     fname = str(request.args["name"]) + ".txt"
-    f = open(fname, "w+")
+    f = open("depthfiles/" + fname, "w+")
     for line in depthMap.depthdata:
         f.write(line)
     f.close()
