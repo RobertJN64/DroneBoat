@@ -3,6 +3,8 @@
 A remote controlled and GPS enabled boat
 with wifi and depth scanning capability.
 
+![Drone Boat Picture](Images/DroneBoat.jpg)
+
 ## Hardware
  - PVC frame
  - Raspbrry Pi
@@ -21,5 +23,5 @@ All current code in CodeV2.
 
 ## Depth Mapping Capability
 
-![Depth Map](Depth%20Map%20Images/demo_map.png)
-![Depth Map](Depth%20Map%20Images/dptfishing.jpeg)
+![Depth Map](Images/demo_map.png)
+![Depth Map](Images/dptfishing.jpeg)
